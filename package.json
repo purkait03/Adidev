@@ -26,6 +26,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "cors": "^2.8.6"
+    "cors": "^2.8.6",
+    "mongoose": "^9.7.4"
   }
 }
