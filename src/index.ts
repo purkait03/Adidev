@@ -1,30 +1,19 @@
-import express, { type Request, type Response } from "express";
-import cors from "cors";
 import dotenv from 'dotenv';
+import {connectDB} from './database/index.js';
+import {app} from './app.js';
 
-dotenv.config({ path: '.env' });
+dotenv.config({ path: './.env' });
 
-const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
-app.use(cors());
-app.use(express.json());
 
-app.get('/', (req: Request, res: Response) => {
-    res.send("Hello");
-});
-
-app.post('/people', (req: Request, res: Response) => {
-    const firstName: string = (req.body.firstName || "").trim();
-    const lastName: string = (req.body.lastName || "").trim();
-    res.json({ firstName, lastName });
-});
-
-app.get('/people/:id', (req: Request, res: Response) => {
-    const id = req.params.id;
-    res.send(`Records for id: ${id}`);
-});
-
+connectDB()
+.then(()=>{
 app.listen(port, () => {
     console.log(`Application is running at http://localhost:${port}`);
+})
+})
+.catch((err)=>{
+    console.log(`Database Connection failed : ${err}`);
+    
 })
