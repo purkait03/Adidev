@@ -1,13 +1,14 @@
 import mongoose, { Schema } from "mongoose"
+import type { Ifolder } from "../interfaces/folder.interface.ts"
 
-interface Ifolder {
-    name: string;
-    description?: string;
-    avatar?: string;
-    file: string;
-    createdAt?: Date,
-    updatedAt?: Date
-}
+// interface Ifolder {
+//     name: string;
+//     description?: string;
+//     avatar?: string;
+//     file: string;
+//     createdAt?: Date,
+//     updatedAt?: Date
+// }
 
 const folderSchema = new Schema<Ifolder>({
     name: {

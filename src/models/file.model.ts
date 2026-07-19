@@ -1,11 +1,12 @@
 import mongoose, { Schema } from "mongoose";
+import type { Ifile } from "../interfaces/file.interface.ts";
 
-interface Ifile {
-    name: string;
-    description?: string;
-    createdAt: Date;
-    updatedAt: Date
-}
+// interface Ifile {
+//     name: string;
+//     description?: string;
+//     createdAt: Date;
+//     updatedAt: Date
+// }
 
 const fileSchema = new Schema<Ifile>({
     name: {
