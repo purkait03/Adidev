@@ -4,12 +4,12 @@ import type { IfilePage } from "../interfaces/filePage.interface.js";
 
 const filePageSchema = new Schema<IfilePage>({
     fileId:{
-        type:String,
-        required:true
+        type: Schema.Types.ObjectId,
+        ref:"File"
     },
     pageId:{
-        type:String,
-        required:true
+        type: Schema.Types.ObjectId,
+        ref:"Page"
     }
 });
 

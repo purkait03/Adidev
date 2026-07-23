@@ -1,4 +1,6 @@
+import { Types } from "mongoose";
+
 export interface IfilePage{
-    fileId:string,
-    pageId:string
+    fileId:Types.ObjectId,
+    pageId:Types.ObjectId
 }

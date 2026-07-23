@@ -1,4 +1,6 @@
+import type { Types } from "mongoose";
+
 export interface IfileFolder{
-    fileId:string,
-    folderId:string
+    fileId:Types.ObjectId,
+    folderId:Types.ObjectId
 }
