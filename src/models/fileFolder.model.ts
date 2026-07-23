@@ -4,12 +4,12 @@ import type { IfileFolder } from "../interfaces/fileFolder.interface.js";
 
 const fileFolderSchema = new Schema<IfileFolder>({
     fileId:{
-        type:String,
-        required:true
+        type: Schema.Types.ObjectId,
+        ref:"File"
     },
     folderId:{
-        type:String,
-        required:true
+        type: Schema.Types.ObjectId,
+        ref:"Folder"
     }
 });
 
