@@ -5,3 +5,7 @@ export interface Iadmin {
     createdAt: Date
     updatedAt: Date
 }
+
+export interface IAdminMethods {
+    generateToken() : string
+}
