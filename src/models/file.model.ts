@@ -27,4 +27,4 @@ const fileSchema = new Schema<Ifile>({
     }
 )
 
-const File = mongoose.model<Ifile>("File", fileSchema)
+export const File = mongoose.model<Ifile>("File", fileSchema)
