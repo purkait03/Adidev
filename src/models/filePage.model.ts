@@ -3,11 +3,11 @@ import type { IfilePage } from "../interfaces/filePage.interface.js";
 
 
 const filePageSchema = new Schema<IfilePage>({
-    fileId:{
+    fileCode:{
         type:String,
         required:true
     },
-    pageId:{
+    pageCode:{
         type:String,
         required:true
     }

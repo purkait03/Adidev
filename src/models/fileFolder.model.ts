@@ -3,11 +3,11 @@ import type { IfileFolder } from "../interfaces/fileFolder.interface.js";
 
 
 const fileFolderSchema = new Schema<IfileFolder>({
-    fileId:{
+    fileCode:{
         type:String,
         required:true
     },
-    folderId:{
+    folderCode:{
         type:String,
         required:true
     }

@@ -1,4 +1,4 @@
 export interface IfilePage{
-    fileId:string,
-    pageId:string
+    fileCode:string,
+    pageCode:string
 }
