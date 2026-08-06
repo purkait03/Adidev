@@ -15,7 +15,7 @@ export const addTokenMethod = (adminSchema: Schema<Iadmin, Model<Iadmin>, IAdmin
 
         return jwt.sign(
             {
-                id: this.code,
+                code: this.code,
                 fullName: this.fullName,
                 email: this.email
             },
