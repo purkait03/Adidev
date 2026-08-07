@@ -6,6 +6,11 @@ import type { SignOptions } from "jsonwebtoken";
 import { addTokenMethod } from "../utils/jwtTokenGeneration.js";
 
 export const adminSchema = new Schema<Iadmin, Model<Iadmin>, IAdminMethods>({
+    code: {
+        type: String,
+        required: true
+    },
+
     fullName: {
         type: String,
         required: true

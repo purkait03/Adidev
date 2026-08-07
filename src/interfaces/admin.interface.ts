@@ -1,4 +1,5 @@
 export interface Iadmin {
+    code: string
     fullName: string;
     email: string
     otp?: string

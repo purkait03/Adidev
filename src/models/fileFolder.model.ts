@@ -1,16 +1,20 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import type { IfileFolder } from "../interfaces/fileFolder.interface.js";
 
 
 const fileFolderSchema = new Schema<IfileFolder>({
-    fileId:{
-        type:String,
-        required:true
+    fileCode: {
+        type: String,
+        required: true
     },
-    folderId:{
-        type:String,
-        required:true
+    folderCode: {
+        type: String,
+        required: true
     }
-});
+},
+    {
+        timestamps: true
+    }
+);
 
-export const FileFolder = mongoose.model<IfileFolder>("FileFolder",fileFolderSchema);
+export const FileFolder = mongoose.model<IfileFolder>("FileFolder", fileFolderSchema);

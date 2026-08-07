@@ -3,6 +3,11 @@ import type { Ipage } from "../interfaces/page.interface.js";
 
 
 const pageSchema = new Schema<Ipage>({
+    code:{
+        type: String,
+        required: true
+    },
+    
     heading: {
         type: String,
         trim: true
