@@ -1,4 +1,6 @@
 export interface IfileFolder{
-    fileId:string,
-    folderId:string
+    fileCode:string,
+    folderCode:string
+    createdAt: Date
+    updatedAt: Date
 }
