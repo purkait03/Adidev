@@ -1,16 +1,20 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import type { IfilePage } from "../interfaces/filePage.interface.js";
 
 
 const filePageSchema = new Schema<IfilePage>({
-    fileId:{
-        type: Schema.Types.ObjectId,
-        ref:"File"
+    fileCode: {
+        type: String,
+        required: true
     },
-    pageId:{
-        type: Schema.Types.ObjectId,
-        ref:"Page"
+    pageCode: {
+        type: String,
+        required: true
     }
-});
+},
+    {
+        timestamps: true
+    }
+);
 
-export const FilePage = mongoose.model<IfilePage>("FilePage",filePageSchema);
+export const FilePage = mongoose.model<IfilePage>("FilePage", filePageSchema);

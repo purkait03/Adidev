@@ -9,6 +9,11 @@ import type { Ifile } from "../interfaces/file.interface.ts";
 // }
 
 const fileSchema = new Schema<Ifile>({
+    code: {
+        type: String,
+        required: true
+    },
+
     name: {
         type: String,
         required: true,
@@ -27,4 +32,4 @@ const fileSchema = new Schema<Ifile>({
     }
 )
 
-const File = mongoose.model<Ifile>("File", fileSchema)
+export const File = mongoose.model<Ifile>("File", fileSchema)
