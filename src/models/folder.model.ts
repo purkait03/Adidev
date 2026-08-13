@@ -29,10 +29,6 @@ const folderSchema = new Schema<Ifolder>({
     },
     avatar: {
         type: String,
-    },
-    file: {
-        type: String,
-        required: true
     }
 },
     {
