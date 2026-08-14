@@ -42,7 +42,30 @@ const createFolder = asyncHandler(async (req: Request, res: Response) => {
 })
 
 const getFolders = asyncHandler(async (req: Request, res: Response) =>{
-    
+    const page = parseInt(req.query.page as string, 10) || 1
+    const limit = 20
+    const skip = (page - 1)*limit
+
+    const [folders, totalFolders] = await Promise.all([
+        Folder.find().sort({createdAt: -1}).skip(skip).limit(limit),
+        Folder.countDocuments()
+    ])
+
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponce(
+            200, 
+            {
+                page,
+                limit,
+                totalFolders,
+                totalPages: Math.ceil(totalFolders / limit),
+                folders
+            } ,
+            "All folders fetched")
+    )
 })
 
 
@@ -52,5 +75,6 @@ const getFolders = asyncHandler(async (req: Request, res: Response) =>{
 
 
 export{
-    createFolder
+    createFolder,
+    getFolders
 }
