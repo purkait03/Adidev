@@ -3,6 +3,7 @@ export interface Ifolder {
     name: string;
     description?: string;
     avatar?: string;
+    isPrivate: boolean
     createdAt?: Date,
     updatedAt?: Date
 }

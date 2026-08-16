@@ -29,6 +29,11 @@ const folderSchema = new Schema<Ifolder>({
     },
     avatar: {
         type: String,
+    },
+
+    isPrivate: {
+        type: Boolean,
+        default: true
     }
 },
     {
