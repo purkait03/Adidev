@@ -7,9 +7,9 @@ import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import { ApiResponce } from "../utils/ApiResponce.js";
 
 const createFolder = asyncHandler(async (req: Request, res: Response) => {
-    const {name, description} = req.body
-    if(!name){
-        throw new ApiError(401, "Name of the folder is required")
+    const {name, description, isPrivate} = req.body
+    if(!name || isPrivate === undefined){
+        throw new ApiError(401, "Name or State of the folder is required")
     }
 
     const code = await generateCode(Folder)
@@ -27,7 +27,8 @@ const createFolder = asyncHandler(async (req: Request, res: Response) => {
         code,
         name,
         description: description || '',
-        avatar: avatarURL
+        avatar: avatarURL,
+        isPrivate
     })
 
     if(!folder){

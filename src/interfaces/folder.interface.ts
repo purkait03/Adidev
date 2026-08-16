@@ -7,3 +7,10 @@ export interface Ifolder {
     createdAt?: Date,
     updatedAt?: Date
 }
+
+export interface ICreateFolder {
+    name: string
+    description?: string
+    avatarBuffer?: Buffer
+    isPrivate: boolean
+}
