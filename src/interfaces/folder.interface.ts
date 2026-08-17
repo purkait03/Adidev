@@ -9,8 +9,8 @@ export interface Ifolder {
 }
 
 export interface ICreateFolder {
-    name: string
-    description?: string
-    avatarBuffer?: Buffer
-    isPrivate: boolean
+    name: string | undefined
+    description?: string | undefined
+    avatarBuffer?: Buffer | undefined
+    isPrivate: boolean | undefined
 }

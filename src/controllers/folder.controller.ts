@@ -5,35 +5,17 @@ import { generateCode } from "../utils/codeGeneration.js";
 import { Folder } from "../models/folder.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import { ApiResponce } from "../utils/ApiResponce.js";
+import { createFolderService } from "../services/folder.service.js";
 
 const createFolder = asyncHandler(async (req: Request, res: Response) => {
     const {name, description, isPrivate} = req.body
-    if(!name || isPrivate === undefined){
-        throw new ApiError(401, "Name or State of the folder is required")
-    }
-
-    const code = await generateCode(Folder)
-    if(!code){
-        throw new ApiError(500, "Code not generated")
-    }
-
-    let avatarURL: string = ''
-    if(req.file?.buffer){
-        const avatar = await uploadOnCloudinary(req.file?.buffer)
-        avatarURL = avatar?.url || ''
-    }
-
-    const folder = await Folder.create({
-        code,
-        name,
-        description: description || '',
-        avatar: avatarURL,
-        isPrivate
-    })
-
-    if(!folder){
-        throw new ApiError(500, "Something went wrong while creating folder")
-    }
+    
+    const folder = await createFolderService({
+    name,
+    description,
+    avatarBuffer: req.file?.buffer,
+    isPrivate
+});
 
     return res
     .status(200)
