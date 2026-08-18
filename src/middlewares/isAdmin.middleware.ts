@@ -4,7 +4,7 @@ import { Admin } from "../models/admin.model.js";
 import { ApiError } from "../utils/ApiError.js";
 
 
-export const isAdmin = asyncHandler(async (req: Request, _: unknown, next: NextFunction) => {
+export const isAdmin = asyncHandler(async (req: Request, _: unknown, next: NextFunction): Promise<void> => {
     const email = req.admin?.email
     if(!email){
         throw new ApiError(401, "Invalid access")
