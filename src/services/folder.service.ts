@@ -115,7 +115,7 @@ const toggleisPrivateService = async (code: string) => {
     }
     const folder = await findByCodeFolderRepo(code)
     if(!folder){
-        throw new ApiError(402, "Folder is not exist")
+        throw new ApiError(404, "Folder not found")
     }
     folder.isPrivate = !folder?.isPrivate
     const updatedFolder = await folder.save()
