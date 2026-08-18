@@ -5,7 +5,7 @@ import { generateCode } from "../utils/codeGeneration.js";
 import { Folder } from "../models/folder.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import { ApiResponce } from "../utils/ApiResponce.js";
-import { createFolderService } from "../services/folder.service.js";
+import { createFolderService, getFoldersService, updateAvatarService, updateFolderService, toggleisPrivateService } from "../services/folder.service.js";
 
 const createFolder = asyncHandler(async (req: Request, res: Response) => {
     const {name, description, isPrivate} = req.body
@@ -24,40 +24,74 @@ const createFolder = asyncHandler(async (req: Request, res: Response) => {
     )
 })
 
-const getFolders = asyncHandler(async (req: Request, res: Response) =>{
-    const page = parseInt(req.query.page as string, 10) || 1
-    const limit = 20
-    const skip = (page - 1)*limit
-
-    const [folders, totalFolders] = await Promise.all([
-        Folder.find().sort({createdAt: -1}).skip(skip).limit(limit),
-        Folder.countDocuments()
-    ])
-
+const getPublicFolders = asyncHandler(async (req: Request, res: Response) => {
+    
+    const data = await getFoldersService(req.query.page as string, false)
 
     return res
     .status(200)
     .json(
         new ApiResponce(
             200, 
-            {
-                page,
-                limit,
-                totalFolders,
-                totalPages: Math.ceil(totalFolders / limit),
-                folders
-            } ,
-            "All folders fetched")
+            data ,
+            "All public folders fetched")
+    )
+})
+
+const getPrivateFolders = asyncHandler(async (req: Request, res: Response) => {
+    const data = await getFoldersService(req.query.page as string, true)
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponce(
+            200, 
+            data ,
+            "All private folders fetched")
+    )
+})
+
+const upadateFolder = asyncHandler(async (req: Request, res: Response) => {
+    const {name, description} = req.body
+    const updatedFolder = await updateFolderService(req.params.code as string, {name, description})
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponce(200, updatedFolder, "Folder updated successfully")
+    )
+})
+
+const updateFolderAvatar = asyncHandler(async (req: Request, res: Response) => {
+    const avatar = await updateAvatarService(req.params.code as string, {avatarBuffer: req.file?.buffer})
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponce(200, avatar, "Avatar updated successfully")
+    )
+})
+
+const toggleFolderState = asyncHandler(async (req: Request, res: Response) => {
+    const {isPrivate} = await toggleisPrivateService(req.params.code as string)
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponce(
+            200, 
+            {isPrivate}, 
+            `Folder state is toggled to ${isPrivate? "public" : "private"} successfully`
+        )
     )
 })
 
 
-
-
-
-
-
 export{
     createFolder,
-    getFolders
+    getPublicFolders,
+    getPrivateFolders,
+    upadateFolder,
+    updateFolderAvatar,
+    toggleFolderState
 }
