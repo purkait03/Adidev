@@ -3,7 +3,14 @@ export interface Ifolder {
     name: string;
     description?: string;
     avatar?: string;
-    file: string;
+    isPrivate: boolean
     createdAt?: Date,
     updatedAt?: Date
+}
+
+export interface ICreateFolder {
+    name: string | undefined
+    description?: string | undefined
+    avatarBuffer?: Buffer | undefined
+    isPrivate: boolean | undefined
 }
