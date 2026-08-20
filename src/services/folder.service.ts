@@ -22,7 +22,7 @@ const createFolderService = async (data: ICreateFolder) => {
     } = data
 
     if(!name || isPrivate === undefined){
-        throw new ApiError(401, "Name or State of the folder is required")
+        throw new ApiError(400, "Name or State of the folder is required")
     }
 
     const code = await generateCode(Folder)

@@ -11,7 +11,8 @@ import type { Ifile } from "../interfaces/file.interface.ts";
 const fileSchema = new Schema<Ifile>({
     code: {
         type: String,
-        required: true
+        required: true,
+        index: true
     },
 
     name: {
