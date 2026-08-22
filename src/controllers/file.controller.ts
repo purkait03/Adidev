@@ -20,7 +20,9 @@ const createFile = asyncHandler( async (req: Request, res: Response) => {
     )
 })
 
-
+const getFiles = asyncHandler( async (req: Request, res: Response) => {
+    
+})
 
 
 export {

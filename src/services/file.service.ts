@@ -4,6 +4,8 @@ import { generateCode } from "../utils/codeGeneration.js";
 import { File } from "../models/file.model.js";
 import { createFileRepo, deleteFileRepo } from "../repositories/file.repository.js";
 import { createFileFolderRepo } from "../repositories/fileFolder.repository.js";
+import { Folder } from "../models/folder.model.js";
+import type { Iadmin } from "../interfaces/admin.interface.js";
 
 
 const createFileService = async (folderCode: string, {name, description}: ICreateFile) => {
@@ -35,7 +37,20 @@ const createFileService = async (folderCode: string, {name, description}: ICreat
     return {file, fileFolder}
 }
 
+const getFileService = async (folderCode: string, admin: Iadmin) => {
+    if(!folderCode){
+        throw new ApiError(400, "Parameter is missing")
+    }
 
+    const folder = await Folder.findOne({code: folderCode}).select("isPrivate")
+    if(!folder){
+        throw new ApiError(404, "Folder not found")
+    }
+
+    if(folder.isPrivate){
+        admin
+    }
+}
 
 export {
     createFileService
