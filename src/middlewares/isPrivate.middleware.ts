@@ -1,18 +1,13 @@
-import type { Request, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/ApiError.js";
-import jwt from "jsonwebtoken";
-import { Admin } from "../models/admin.model.js";
-import type { MyCustomPayload } from "../interfaces/jwtCustomPayload.interface.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { findByCodeFolderRepo } from "../repositories/folder.repository.js";
+import { verifyJWT } from "./auth.middleware.js";
 
 
-const jwtSecret = process.env.TOKEN
-if (!jwtSecret) {
-    throw new ApiError(500, "TOKEN_SECRET is not defined")
-}
 
-export const isPrivate = asyncHandler(async (req: Request, _: unknown, next: NextFunction): Promise<void> => {
+
+export const isPrivate = asyncHandler(async (req: Request, _: Response, next: NextFunction): Promise<void> => {
     try {
         const folderCode = req.params.code as string
         if (!folderCode) {
@@ -25,20 +20,7 @@ export const isPrivate = asyncHandler(async (req: Request, _: unknown, next: Nex
         }
 
         if (folder.isPrivate) {
-            const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "")
-
-            if (!token) {
-                throw new ApiError(401, "Unauthorized access")
-            }
-            const decodedToken = jwt.verify(token, jwtSecret) as MyCustomPayload
-            const admin = await Admin.findOne({ code: decodedToken.code }).select("-otp")
-
-            if (!admin) {
-                throw new ApiError(401, "invalid  Token")
-            }
-
-            req.admin = admin
-            next()
+            await verifyJWT(req, _, next)
         }else{
             next()
         }
