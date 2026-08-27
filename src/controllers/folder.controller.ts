@@ -53,7 +53,7 @@ const getPrivateFolders = asyncHandler(async (req: Request, res: Response) => {
 
 const upadateFolder = asyncHandler(async (req: Request, res: Response) => {
     const {name, description} = req.body
-    const updatedFolder = await updateFolderService(req.params.code as string, {name, description})
+    const updatedFolder = await updateFolderService(req.params.folderCode as string, {name, description})
 
     return res
     .status(200)
@@ -63,7 +63,7 @@ const upadateFolder = asyncHandler(async (req: Request, res: Response) => {
 })
 
 const updateFolderAvatar = asyncHandler(async (req: Request, res: Response) => {
-    const avatar = await updateAvatarService(req.params.code as string, {avatarBuffer: req.file?.buffer})
+    const avatar = await updateAvatarService(req.params.folderCode as string, {avatarBuffer: req.file?.buffer})
 
     return res
     .status(200)
@@ -73,7 +73,7 @@ const updateFolderAvatar = asyncHandler(async (req: Request, res: Response) => {
 })
 
 const toggleFolderState = asyncHandler(async (req: Request, res: Response) => {
-    const {isPrivate} = await toggleisPrivateService(req.params.code as string)
+    const {isPrivate} = await toggleisPrivateService(req.params.folderCode as string)
 
     return res
     .status(200)

@@ -3,7 +3,7 @@ import type { ICreateFile } from "../interfaces/file.interface.js"
 import { generateCode } from "../utils/codeGeneration.js";
 import { File } from "../models/file.model.js";
 import { createFileRepo, deleteFileRepo } from "../repositories/file.repository.js";
-import { createFileFolderRepo, getFileFolderRepo } from "../repositories/fileFolder.repository.js";
+import { createFileFolderRepo, getFilesOfAFolderRepo } from "../repositories/fileFolder.repository.js";
 import { Folder } from "../models/folder.model.js";
 import type { Iadmin } from "../interfaces/admin.interface.js";
 
@@ -37,12 +37,13 @@ const createFileService = async (folderCode: string, {name, description}: ICreat
     return {file, fileFolder}
 }
 
-const getFileService = async (folderCode: string, admin: Iadmin) => {
-    const files = await getFileFolderRepo(folderCode)
-
-    
+const getFilesService = async (folderCode: string) => {
+    const files = await getFilesOfAFolderRepo(folderCode)
+    let data = files[0] ? files[0] : {totalFiles: 0, allFiles: []}
+    return data 
 }
 
 export {
-    createFileService
+    createFileService,
+    getFilesService
 }

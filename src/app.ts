@@ -14,8 +14,9 @@ app.use(express.urlencoded({extended: true, limit: "16kb"}));
 
 // Routers
 import folderRouters from "./routers/folder.routes.js"
+import fileRouters from "./routers/file.routes.js"
 
 app.use("/app/v1/folder", folderRouters)
-
+app.use("/app/v1/file", fileRouters)
 
 export { app }

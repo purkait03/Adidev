@@ -20,8 +20,8 @@ router.route("/public").get(getPublicFolders)
 // Private routes
 router.route("/create").post(verifyJWT, isAdmin, createFolder)
 router.route("/private").get(verifyJWT, getPrivateFolders)
-router.route("/update/:code").patch(verifyJWT, upadateFolder)
-router.route("/update/avatar/:code").patch(verifyJWT, updateFolderAvatar)
-router.route("/toggle/:code").patch(verifyJWT, toggleFolderState)
+router.route("/update/:folderCode").patch(verifyJWT, upadateFolder)
+router.route("/update/avatar/:folderCode").patch(verifyJWT, updateFolderAvatar)
+router.route("/toggle/:folderCode").patch(verifyJWT, toggleFolderState)
 
 export default router
