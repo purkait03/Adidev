@@ -2,8 +2,8 @@ import { ApiError } from "../utils/ApiError.js";
 import type { ICreateFile } from "../interfaces/file.interface.js"
 import { generateCode } from "../utils/codeGeneration.js";
 import { File } from "../models/file.model.js";
-import { createFileRepo, deleteFileRepo } from "../repositories/file.repository.js";
-import { createFileFolderRepo, getFilesOfAFolderRepo } from "../repositories/fileFolder.repository.js";
+import { createFileRepo, deleteFileRepo, findAndUpdateFileRepo } from "../repositories/file.repository.js";
+import { createFileFolderRepo, getFilesOfAFolderRepo, deleteFileFolderRepo } from "../repositories/fileFolder.repository.js";
 import { Folder } from "../models/folder.model.js";
 import type { Iadmin } from "../interfaces/admin.interface.js";
 
@@ -43,7 +43,46 @@ const getFilesService = async (folderCode: string) => {
     return data 
 }
 
+const updateFileService = async (fileCode: string, data:any) => {
+
+    if(!fileCode){
+        throw new ApiError(400, "File code is required in parameter")
+    }
+
+    if(!data.name){
+        throw new ApiError(400, "Name is required")
+    }
+    const file = await findAndUpdateFileRepo(fileCode, data)
+
+    if(!file){
+        throw new ApiError(404, "Something went wrong while updating file")
+    }
+
+    return file
+}
+
+const moveFileService = async (fileCode: string, folderCode: string) => {
+
+    if(!fileCode && !folderCode){
+        throw new ApiError(400, "File code and Folder code is required as query")
+    }
+
+    const newMovedFileFolder = await createFileFolderRepo(fileCode, folderCode)
+
+    if(!newMovedFileFolder){
+        throw new ApiError(404, "Something went wrong while moving file")
+    }
+
+    const deletedFileFolder = await deleteFileFolderRepo(fileCode)
+    if(!deletedFileFolder){
+        throw new ApiError(404, "Something went wrong while moving file")
+    }
+    return newMovedFileFolder
+}
+
 export {
     createFileService,
-    getFilesService
+    getFilesService,
+    updateFileService,
+    moveFileService
 }

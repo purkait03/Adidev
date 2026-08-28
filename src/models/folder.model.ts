@@ -14,7 +14,8 @@ const folderSchema = new Schema<Ifolder>({
     code: {
         type: String,
         required: true,
-        index: true
+        index: true,
+        unique: true
     },
     
     name: {

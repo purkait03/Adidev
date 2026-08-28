@@ -10,7 +10,21 @@ const deleteFileRepo = async (fileCode: string) => {
     return await File.deleteOne({code: fileCode})
 }
 
+const findAndUpdateFileRepo = async (fileCode: string, data: any) => {
+    return await File.findOneAndUpdate(
+        {code: fileCode},
+        {
+            $set:{
+                name: data.name,
+                description: data.description ? data.description : ''
+            }
+        },
+        {new: true}
+    )
+}
+
 export {
     createFileRepo,
-    deleteFileRepo
+    deleteFileRepo,
+    findAndUpdateFileRepo
 }

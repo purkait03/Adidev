@@ -45,8 +45,13 @@ const getFilesOfAFolderRepo = async (folderCode: string) => {
     ])
 }
 
+const deleteFileFolderRepo = async (fileCode: string) => {
+    return await FileFolder.findOneAndDelete({fileCode})
+}
+
 export {
     createFileFolderRepo,
     getFileFolderRepo,
-    getFilesOfAFolderRepo
+    getFilesOfAFolderRepo,
+    deleteFileFolderRepo
 }

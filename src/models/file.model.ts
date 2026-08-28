@@ -12,7 +12,8 @@ const fileSchema = new Schema<Ifile>({
     code: {
         type: String,
         required: true,
-        index: true
+        index: true,
+        unique: true
     },
 
     name: {
