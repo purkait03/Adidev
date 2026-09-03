@@ -62,6 +62,10 @@ const moveFile = asyncHandler( async ( req: Request, res: Response) => {
     )
 })
 
+const deleteFile = asyncHandler( async (req: Request, res: Response) => {
+    
+})
+
 export {
     createFile,
     getFiles,

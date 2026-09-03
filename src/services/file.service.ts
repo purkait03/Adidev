@@ -6,6 +6,7 @@ import { createFileRepo, deleteFileRepo, findAndUpdateFileRepo } from "../reposi
 import { createFileFolderRepo, getFilesOfAFolderRepo, deleteFileFolderRepo } from "../repositories/fileFolder.repository.js";
 import { Folder } from "../models/folder.model.js";
 import type { Iadmin } from "../interfaces/admin.interface.js";
+import { deleteFilePagesRepo } from "../repositories/filePage.repository.js";
 
 
 const createFileService = async (folderCode: string, {name, description}: ICreateFile) => {
@@ -78,6 +79,15 @@ const moveFileService = async (fileCode: string, folderCode: string) => {
         throw new ApiError(404, "Something went wrong while moving file")
     }
     return newMovedFileFolder
+}
+
+const deleteFileService = async (fileCode: string) => {
+    const [fileFolder, filepage, file] = await Promise.all([
+        deleteFileFolderRepo(fileCode),
+        deleteFilePagesRepo(fileCode),
+        deleteFileRepo(fileCode)
+    ])
+
 }
 
 export {
