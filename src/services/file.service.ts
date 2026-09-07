@@ -7,55 +7,56 @@ import { createFileFolderRepo, getFilesOfAFolderRepo, deleteFileFolderRepo } fro
 import { Folder } from "../models/folder.model.js";
 import type { Iadmin } from "../interfaces/admin.interface.js";
 import { deleteFilePagesRepo } from "../repositories/filePage.repository.js";
+import mongoose from "mongoose";
 
 
-const createFileService = async (folderCode: string, {name, description}: ICreateFile) => {
-    if(!name){
+const createFileService = async (folderCode: string, { name, description }: ICreateFile) => {
+    if (!name) {
         throw new ApiError(400, "Name is required")
     }
-    if(!folderCode){
+    if (!folderCode) {
         throw new ApiError(400, "Folder code is required in parameter")
     }
 
     const code = await generateCode(File)
-    if(!code){
+    if (!code) {
         throw new ApiError(500, "Code not generated")
     }
 
-    const file = await createFileRepo({code, name, description: description || ''})
+    const file = await createFileRepo({ code, name, description: description || '' })
 
-    if(!file){
+    if (!file) {
         throw new ApiError(500, "Something went wrong while creating file")
     }
 
     const fileFolder = await createFileFolderRepo(file.code, folderCode)
-    if(!fileFolder){
+    if (!fileFolder) {
         await deleteFileRepo(file.code)
 
         throw new ApiError(500, "Something went wrong while creating fileFolder")
     }
 
-    return {file, fileFolder}
+    return { file, fileFolder }
 }
 
 const getFilesService = async (folderCode: string) => {
     const files = await getFilesOfAFolderRepo(folderCode)
-    let data = files[0] ? files[0] : {totalFiles: 0, allFiles: []}
-    return data 
+    let data = files[0] ? files[0] : { totalFiles: 0, allFiles: [] }
+    return data
 }
 
-const updateFileService = async (fileCode: string, data:any) => {
+const updateFileService = async (fileCode: string, data: any) => {
 
-    if(!fileCode){
+    if (!fileCode) {
         throw new ApiError(400, "File code is required in parameter")
     }
 
-    if(!data.name){
+    if (!data.name) {
         throw new ApiError(400, "Name is required")
     }
     const file = await findAndUpdateFileRepo(fileCode, data)
 
-    if(!file){
+    if (!file) {
         throw new ApiError(404, "Something went wrong while updating file")
     }
 
@@ -64,29 +65,61 @@ const updateFileService = async (fileCode: string, data:any) => {
 
 const moveFileService = async (fileCode: string, folderCode: string) => {
 
-    if(!fileCode && !folderCode){
+    if (!fileCode && !folderCode) {
         throw new ApiError(400, "File code and Folder code is required as query")
     }
 
     const newMovedFileFolder = await createFileFolderRepo(fileCode, folderCode)
 
-    if(!newMovedFileFolder){
+    if (!newMovedFileFolder) {
         throw new ApiError(404, "Something went wrong while moving file")
     }
 
     const deletedFileFolder = await deleteFileFolderRepo(fileCode)
-    if(!deletedFileFolder){
+    if (!deletedFileFolder) {
         throw new ApiError(404, "Something went wrong while moving file")
     }
     return newMovedFileFolder
 }
 
 const deleteFileService = async (fileCode: string) => {
-    const [fileFolder, filepage, file] = await Promise.all([
-        deleteFileFolderRepo(fileCode),
-        deleteFilePagesRepo(fileCode),
-        deleteFileRepo(fileCode)
-    ])
+    const session = await mongoose.startSession()
+
+    try {
+        await session.withTransaction(async () => {
+            // await deleteFileFolderRepo(fileCode)
+            // await deleteFilePagesRepo(fileCode)
+            // await deleteFileRepo(fileCode)
+
+            const [fileFolder, filepage, file] = await Promise.all([
+                deleteFileFolderRepo(fileCode),
+                deleteFilePagesRepo(fileCode),
+                deleteFileRepo(fileCode)
+            ])
+
+            if(!fileFolder){
+                throw new Error('FileFolder is not deleted')
+            }
+            if(!filepage){
+                throw new Error('FilePages is not deleted')
+            }
+            if(!file){
+                throw new Error('File is not deleted')
+            }
+        })
+
+        const success = true
+        return success
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new ApiError(400, `Delete is not aborted:    ${error.message}`)
+        }
+    } finally {
+        await session.endSession()
+    }
+
+
+
 
 }
 
