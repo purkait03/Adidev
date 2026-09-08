@@ -6,8 +6,9 @@ import { createFileRepo, deleteFileRepo, findAndUpdateFileRepo } from "../reposi
 import { createFileFolderRepo, getFilesOfAFolderRepo, deleteFileFolderRepo } from "../repositories/fileFolder.repository.js";
 import { Folder } from "../models/folder.model.js";
 import type { Iadmin } from "../interfaces/admin.interface.js";
-import { deleteFilePagesRepo } from "../repositories/filePage.repository.js";
+import { allPagesRepo, deleteFilePagesRepo } from "../repositories/filePage.repository.js";
 import mongoose from "mongoose";
+import { bulkDeletePageRepo } from "../repositories/page.repository.js";
 
 
 const createFileService = async (folderCode: string, { name, description }: ICreateFile) => {
@@ -87,39 +88,53 @@ const deleteFileService = async (fileCode: string) => {
 
     try {
         await session.withTransaction(async () => {
-            // await deleteFileFolderRepo(fileCode)
-            // await deleteFilePagesRepo(fileCode)
-            // await deleteFileRepo(fileCode)
+            const fileFolder = await deleteFileFolderRepo(fileCode, session)
+            
+            const file = await deleteFileRepo(fileCode, session)
 
-            const [fileFolder, filepage, file] = await Promise.all([
-                deleteFileFolderRepo(fileCode),
-                deleteFilePagesRepo(fileCode),
-                deleteFileRepo(fileCode)
-            ])
+            // const [fileFolder, filepage, file] = await Promise.all([
+            //     deleteFileFolderRepo(fileCode),
+            //     deleteFilePagesRepo(fileCode),
+            //     deleteFileRepo(fileCode)
+            // ])
 
             if(!fileFolder){
                 throw new Error('FileFolder is not deleted')
             }
-            if(!filepage){
-                throw new Error('FilePages is not deleted')
-            }
-            if(!file){
+            if(file.deletedCount === 0){
                 throw new Error('File is not deleted')
             }
+
+            const cursor = allPagesRepo(fileCode, session)
+            
+            let batchIds = []
+            const BATCH_SIZE = 100
+
+            for await (const doc of cursor){
+                batchIds.push(doc.pageCode)
+                
+                if(batchIds.length === BATCH_SIZE){
+                    await bulkDeletePageRepo(batchIds, session)
+                    batchIds = []
+                }
+            }
+
+            if(batchIds.length > 0){
+                await bulkDeletePageRepo(batchIds, session)
+            }
+
+            await deleteFilePagesRepo(fileCode, session)
         })
 
-        const success = true
-        return success
+        
     } catch (error) {
         if (error instanceof Error) {
-            throw new ApiError(400, `Delete is not aborted:    ${error.message}`)
+            throw new ApiError(400, `Delete aborted:    ${error.message}`)
         }
+        throw error
     } finally {
         await session.endSession()
     }
-
-
-
 
 }
 
@@ -127,5 +142,6 @@ export {
     createFileService,
     getFilesService,
     updateFileService,
-    moveFileService
+    moveFileService,
+    deleteFileService
 }

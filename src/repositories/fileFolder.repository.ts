@@ -1,3 +1,4 @@
+import type { ClientSession } from "mongoose"
 import { FileFolder } from "../models/fileFolder.model.js"
 
 
@@ -45,8 +46,8 @@ const getFilesOfAFolderRepo = async (folderCode: string) => {
     ])
 }
 
-const deleteFileFolderRepo = async (fileCode: string) => {
-    return await FileFolder.findOneAndDelete({fileCode})
+const deleteFileFolderRepo = async (fileCode: string, session?: ClientSession) => {
+    return await FileFolder.findOneAndDelete({fileCode}, session ? {session} : {})
 }
 
 export {

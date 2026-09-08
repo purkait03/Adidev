@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponce } from "../utils/ApiResponce.js";
 import type { Request, Response } from "express";
-import { createFileService, getFilesService, updateFileService, moveFileService } from "../services/file.service.js";
+import { createFileService, getFilesService, updateFileService, moveFileService, deleteFileService } from "../services/file.service.js";
 
 
 const createFile = asyncHandler( async (req: Request, res: Response) => {
@@ -63,12 +63,19 @@ const moveFile = asyncHandler( async ( req: Request, res: Response) => {
 })
 
 const deleteFile = asyncHandler( async (req: Request, res: Response) => {
-    
+    await deleteFileService(req.params.fileCode as string)
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponce(200, {}, 'File deleted successfully')
+    )
 })
 
 export {
     createFile,
     getFiles,
     updateFile,
-    moveFile
+    moveFile,
+    deleteFile
 }
