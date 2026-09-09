@@ -6,29 +6,30 @@ import type { MyCustomPayload } from "../interfaces/jwtCustomPayload.interface.j
 import { asyncHandler } from "../utils/AsyncHandler.js";
 
 
-const jwtSecret = process.env.TOKEN
-if(!jwtSecret){
-    throw new ApiError(500, "TOKEN_SECRET is not defined")
-}
+const jwtSecret = process.env.TOKEN_SECRET
 
-export const verifyJWT = asyncHandler( async (req: Request, _: Response, next: NextFunction): Promise<void> => {
-    try{
+export const verifyJWT = asyncHandler(async (req: Request, _: Response, next: NextFunction): Promise<void> => {
+    try {
+        
+        if (!jwtSecret) {
+            throw new ApiError(500, "TOKEN_SECRET is not defined")
+        }
         const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "")
 
-        if(!token){
+        if (!token) {
             throw new ApiError(401, "Unauthorized access")
         }
         const decodedToken = jwt.verify(token, jwtSecret) as MyCustomPayload
-        const admin = await Admin.findOne({code: decodedToken.code}).select("-otp")
+        const admin = await Admin.findOne({ code: decodedToken.code }).select("-otp")
 
-        if(!admin){
+        if (!admin) {
             throw new ApiError(401, "invalid  Token")
         }
 
         req.admin = admin
         next()
 
-    }catch (error){
+    } catch (error) {
         let err = error as Error
         throw new ApiError(401, err?.message || "Unauthorized access")
     }
