@@ -86,6 +86,10 @@ const toggleFolderState = asyncHandler(async (req: Request, res: Response) => {
     )
 })
 
+const deleteFolder = asyncHandler( async (req: Request, res: Response) => {
+    
+})
+
 
 export{
     createFolder,

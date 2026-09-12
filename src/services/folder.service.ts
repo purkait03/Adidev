@@ -12,6 +12,7 @@ import {
     upatdeFolderRepo, 
     updateAvatarRepo
 } from "../repositories/folder.repository.js"
+import mongoose from "mongoose"
 
 const createFolderService = async (data: ICreateFolder) => {
     const {
@@ -125,6 +126,21 @@ const toggleisPrivateService = async (code: string) => {
     }
 
     return {isPrivate: updatedFolder.isPrivate}
+}
+
+const deleteFolderService = async (folderCode: string) => {
+    const session = await mongoose.startSession()
+
+    try {
+        
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new ApiError(400, `Delete aborted:    ${error.message}`)
+        }
+        throw error
+    } finally {
+        await session.endSession()
+    }
 }
 
 
