@@ -6,6 +6,7 @@ import { uploadOnCloudinary } from "../utils/Cloudinary.js"
 import { 
     countDocumentFolderRepository, 
     createFolderRepository, 
+    deleteFolderRepo, 
     findByCodeFolderRepo, 
     findPrivateFolders, 
     findPublicFolders, 
@@ -132,6 +133,7 @@ const deleteFolderService = async (folderCode: string) => {
     const session = await mongoose.startSession()
 
     try {
+        const folder = await deleteFolderRepo(folderCode)
         
     } catch (error) {
         if (error instanceof Error) {

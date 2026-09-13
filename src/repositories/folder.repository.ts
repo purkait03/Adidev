@@ -47,3 +47,7 @@ export const updateAvatarRepo = async (code: string, avatar: string) => {
 export const findByCodeFolderRepo = async (code: string) => {
     return await Folder.findOne({code})
 }
+
+export const deleteFolderRepo = async (folderCode: string) => {
+    return await Folder.deleteOne({code: folderCode})
+}
