@@ -3,17 +3,21 @@ import { ApiError } from "../utils/ApiError.js"
 import { generateCode } from "../utils/codeGeneration.js"
 import { Folder } from "../models/folder.model.js"
 import { uploadOnCloudinary } from "../utils/Cloudinary.js"
-import { 
-    countDocumentFolderRepository, 
-    createFolderRepository, 
-    deleteFolderRepo, 
-    findByCodeFolderRepo, 
-    findPrivateFolders, 
-    findPublicFolders, 
-    upatdeFolderRepo, 
+import {
+    countDocumentFolderRepository,
+    createFolderRepository,
+    deleteFolderRepo,
+    findByCodeFolderRepo,
+    findPrivateFolders,
+    findPublicFolders,
+    upatdeFolderRepo,
     updateAvatarRepo
 } from "../repositories/folder.repository.js"
 import mongoose from "mongoose"
+import { allFileCursorRepo, deleteFilesOfAFolderRepo, getFilesOfAFolderRepo } from "../repositories/fileFolder.repository.js"
+import { deleteBulkFileRepo } from "../repositories/file.repository.js"
+import { allPagesRepo, deleteFilePagesRepo } from "../repositories/filePage.repository.js"
+import { bulkDeletePageRepo } from "../repositories/page.repository.js"
 
 const createFolderService = async (data: ICreateFolder) => {
     const {
@@ -23,17 +27,17 @@ const createFolderService = async (data: ICreateFolder) => {
         isPrivate
     } = data
 
-    if(!name || isPrivate === undefined){
+    if (!name || isPrivate === undefined) {
         throw new ApiError(400, "Name or State of the folder is required")
     }
 
     const code = await generateCode(Folder)
-    if(!code){
+    if (!code) {
         throw new ApiError(500, "Code not generated")
     }
 
     let avatarURL: string = ''
-    if(avatarBuffer){
+    if (avatarBuffer) {
         const avatar = await uploadOnCloudinary(avatarBuffer)
         avatarURL = avatar?.url || ''
     }
@@ -46,8 +50,8 @@ const createFolderService = async (data: ICreateFolder) => {
         isPrivate
     })
 
-    if(!folder){
-        throw new ApiError (500, "Something went wrong while creating folder")
+    if (!folder) {
+        throw new ApiError(500, "Something went wrong while creating folder")
     }
 
     return folder
@@ -59,31 +63,31 @@ const getFoldersService = async (pageAsString: string, isPrivate: boolean) => {
     const skip = (page - 1) * limit
 
     const [folders, totalFolders] = await Promise.all([
-        isPrivate ? findPrivateFolders({skip, limit}) : findPublicFolders({skip, limit}),
+        isPrivate ? findPrivateFolders({ skip, limit }) : findPublicFolders({ skip, limit }),
         countDocumentFolderRepository(isPrivate)
     ])
 
     return {
-                page,
-                limit,
-                totalFolders,
-                totalPages: Math.ceil(totalFolders / limit),
-                folders
-            }
+        page,
+        limit,
+        totalFolders,
+        totalPages: Math.ceil(totalFolders / limit),
+        folders
+    }
 }
 
 const updateFolderService = async (code: string, data: Omit<ICreateFolder, "isPrivate">) => {
-    const {name, description} = data
+    const { name, description } = data
 
-    if(!name){
+    if (!name) {
         throw new ApiError(401, "Name is required")
     }
-    if(!code){
+    if (!code) {
         throw new ApiError(401, "Folder code is required")
     }
 
-    const updatedFolder = await upatdeFolderRepo(code, {name, description})
-    if(!updatedFolder){
+    const updatedFolder = await upatdeFolderRepo(code, { name, description })
+    if (!updatedFolder) {
         throw new ApiError(500, "Somthing went wrong while updating folder")
     }
 
@@ -91,11 +95,11 @@ const updateFolderService = async (code: string, data: Omit<ICreateFolder, "isPr
 }
 
 const updateAvatarService = async (code: string, data: Pick<ICreateFolder, "avatarBuffer">) => {
-    const {avatarBuffer} = data
-    if(!avatarBuffer){
+    const { avatarBuffer } = data
+    if (!avatarBuffer) {
         throw new ApiError(401, "Avatar is required")
     }
-    if(!code){
+    if (!code) {
         throw new ApiError(401, "Folder code is required")
     }
 
@@ -104,7 +108,7 @@ const updateAvatarService = async (code: string, data: Pick<ICreateFolder, "avat
     avatarURL = avatar?.url || ''
 
     const updatedAvatar = await updateAvatarRepo(code, avatarURL)
-    if(!updatedAvatar){
+    if (!updatedAvatar) {
         throw new ApiError(500, "Somthing went wrong while updating folder avatar")
     }
 
@@ -112,29 +116,73 @@ const updateAvatarService = async (code: string, data: Pick<ICreateFolder, "avat
 }
 
 const toggleisPrivateService = async (code: string) => {
-    if(!code){
+    if (!code) {
         throw new ApiError(401, "Folder code is required")
     }
     const folder = await findByCodeFolderRepo(code)
-    if(!folder){
+    if (!folder) {
         throw new ApiError(404, "Folder not found")
     }
     folder.isPrivate = !folder?.isPrivate
     const updatedFolder = await folder.save()
 
-    if(!updatedFolder){
+    if (!updatedFolder) {
         throw new ApiError(502, "Something went wrong while updating folder state")
     }
 
-    return {isPrivate: updatedFolder.isPrivate}
+    return { isPrivate: updatedFolder.isPrivate }
 }
 
 const deleteFolderService = async (folderCode: string) => {
     const session = await mongoose.startSession()
 
     try {
-        const folder = await deleteFolderRepo(folderCode)
-        
+        await session.withTransaction(async () => {
+            const folder = await deleteFolderRepo(folderCode, session)
+            if (folder) {
+                throw new Error('Folder is not found')
+            }
+
+            const fileCursor = allFileCursorRepo(folderCode, session)
+            let batchIds = []
+            const BATCH_SIZE = 100
+
+            for await (let doc of fileCursor) {
+                batchIds.push(doc.fileCode)
+
+                if (batchIds.length === BATCH_SIZE) {
+                    await deleteBulkFileRepo(batchIds, session)
+                    batchIds = []
+                }
+            }
+            if (batchIds.length > 0) {
+                await deleteBulkFileRepo(batchIds, session)
+            }
+
+
+            for await (let doc of fileCursor) {
+                const pageCursor = allPagesRepo(doc.fileCode, session)
+
+                batchIds = []
+
+                for await (const doc of pageCursor) {
+                    batchIds.push(doc.pageCode)
+
+                    if (batchIds.length === BATCH_SIZE) {
+                        await bulkDeletePageRepo(batchIds, session)
+                        batchIds = []
+                    }
+                }
+                if (batchIds.length > 0) {
+                    await bulkDeletePageRepo(batchIds, session)
+                }
+
+                await deleteFilePagesRepo(doc.fileCode, session)
+            }
+
+            await deleteFilesOfAFolderRepo(folderCode, session)
+        })
+
     } catch (error) {
         if (error instanceof Error) {
             throw new ApiError(400, `Delete aborted:    ${error.message}`)
@@ -147,10 +195,11 @@ const deleteFolderService = async (folderCode: string) => {
 
 
 
-export{
+export {
     createFolderService,
     getFoldersService,
     updateFolderService,
     updateAvatarService,
-    toggleisPrivateService
+    toggleisPrivateService,
+    deleteFolderService
 }

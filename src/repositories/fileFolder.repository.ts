@@ -50,9 +50,19 @@ const deleteFileFolderRepo = async (fileCode: string, session?: ClientSession) =
     return await FileFolder.findOneAndDelete({fileCode}, session ? {session} : {})
 }
 
+const allFileCursorRepo = (folderCode: string, session: ClientSession) => {
+    return FileFolder.find({folderCode}, {projection: {fileCode : 1}}, {session}).cursor()
+}
+
+const deleteFilesOfAFolderRepo = async (folderCode: string, session: ClientSession) => {
+    return await FileFolder.deleteMany({folderCode}, {session})
+}
+
 export {
     createFileFolderRepo,
     getFileFolderRepo,
     getFilesOfAFolderRepo,
-    deleteFileFolderRepo
+    deleteFileFolderRepo,
+    allFileCursorRepo,
+    deleteFilesOfAFolderRepo
 }

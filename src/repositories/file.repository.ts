@@ -24,8 +24,13 @@ const findAndUpdateFileRepo = async (fileCode: string, data: any) => {
     )
 }
 
+const deleteBulkFileRepo = async (batchIds: string[], session: ClientSession) => {
+    return await File.deleteMany({code: {$in: batchIds}}, {session})
+}
+
 export {
     createFileRepo,
     deleteFileRepo,
-    findAndUpdateFileRepo
+    findAndUpdateFileRepo,
+    deleteBulkFileRepo
 }

@@ -1,3 +1,4 @@
+import type { ClientSession } from "mongoose";
 import type { Ifolder, ICreateFolder } from "../interfaces/folder.interface.js";
 import { Folder } from "../models/folder.model.js";
 
@@ -48,6 +49,6 @@ export const findByCodeFolderRepo = async (code: string) => {
     return await Folder.findOne({code})
 }
 
-export const deleteFolderRepo = async (folderCode: string) => {
-    return await Folder.deleteOne({code: folderCode})
+export const deleteFolderRepo = async (folderCode: string, session: ClientSession) => {
+    return await Folder.deleteOne({code: folderCode}, {session}).cursor()
 }

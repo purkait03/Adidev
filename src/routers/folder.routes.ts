@@ -7,7 +7,8 @@ import {
     getPublicFolders,
     upadateFolder,
     updateFolderAvatar,
-    toggleFolderState
+    toggleFolderState,
+    deleteFolder
 } from "../controllers/folder.controller.js";
 
 
@@ -23,5 +24,6 @@ router.route("/private").get(verifyJWT, getPrivateFolders)
 router.route("/update/:folderCode").patch(verifyJWT, upadateFolder)
 router.route("/update/avatar/:folderCode").patch(verifyJWT, updateFolderAvatar)
 router.route("/toggle/:folderCode").patch(verifyJWT, toggleFolderState)
+router.route("/delete/:folderCode").delete(verifyJWT, deleteFolder)
 
 export default router

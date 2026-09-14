@@ -5,7 +5,7 @@ import { generateCode } from "../utils/codeGeneration.js";
 import { Folder } from "../models/folder.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import { ApiResponce } from "../utils/ApiResponce.js";
-import { createFolderService, getFoldersService, updateAvatarService, updateFolderService, toggleisPrivateService } from "../services/folder.service.js";
+import { createFolderService, getFoldersService, updateAvatarService, updateFolderService, toggleisPrivateService, deleteFolderService } from "../services/folder.service.js";
 
 const createFolder = asyncHandler(async (req: Request, res: Response) => {
     const {name, description, isPrivate} = req.body
@@ -87,7 +87,17 @@ const toggleFolderState = asyncHandler(async (req: Request, res: Response) => {
 })
 
 const deleteFolder = asyncHandler( async (req: Request, res: Response) => {
-    
+    await deleteFolderService(req.params.folderCode as string)
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponce(
+            200,
+            {},
+            'Folder deleted successfully'
+        )
+    )
 })
 
 
@@ -97,5 +107,6 @@ export{
     getPrivateFolders,
     upadateFolder,
     updateFolderAvatar,
-    toggleFolderState
+    toggleFolderState,
+    deleteFolder
 }
