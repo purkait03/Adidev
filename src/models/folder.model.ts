@@ -13,7 +13,9 @@ import type { Ifolder } from "../interfaces/folder.interface.ts"
 const folderSchema = new Schema<Ifolder>({
     code: {
         type: String,
-        required: true
+        required: true,
+        index: true,
+        unique: true
     },
     
     name: {
@@ -30,9 +32,10 @@ const folderSchema = new Schema<Ifolder>({
     avatar: {
         type: String,
     },
-    file: {
-        type: String,
-        required: true
+
+    isPrivate: {
+        type: Boolean,
+        default: true
     }
 },
     {
