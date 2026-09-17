@@ -1,12 +1,10 @@
 export interface Iadmin {
-    code: string
-    fullName: string;
+    adminCode: string
+    fullName: string
     email: string
-    otp?: string
+    code: string,
+    isLoggedIn?: boolean,
     createdAt: Date
     updatedAt: Date
-}
-
-export interface IAdminMethods {
     generateToken() : string
 }
