@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { isAdmin } from "../middlewares/isAdmin.middleware.js";
 import {
     createFolder,
     getPrivateFolders,
@@ -18,7 +17,7 @@ const router = Router()
 router.route("/public").get(getPublicFolders)
 
 // Private routes
-router.route("/create").post(verifyJWT, isAdmin, createFolder)
+router.route("/create").post(verifyJWT, createFolder)
 router.route("/private").get(verifyJWT, getPrivateFolders)
 router.route("/update/:folderCode").patch(verifyJWT, upadateFolder)
 router.route("/update/avatar/:folderCode").patch(verifyJWT, updateFolderAvatar)

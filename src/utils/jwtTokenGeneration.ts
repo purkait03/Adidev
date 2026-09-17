@@ -3,10 +3,12 @@ import jwt from "jsonwebtoken"
 import { ApiError } from "../utils/ApiError.js";
 import type { SignOptions } from "jsonwebtoken";
 import type { Iadmin } from "../interfaces/admin.interface.js";
-import type { IAdminMethods } from "../interfaces/admin.interface.js";
 import {Schema, Model} from "mongoose"
+import dotenv from 'dotenv'
 
-export const addTokenMethod = (adminSchema: Schema<Iadmin, Model<Iadmin>, IAdminMethods>) => {
+dotenv.config();
+
+export const addTokenMethod = (adminSchema: Schema<Iadmin, Model<Iadmin>>) => {
     adminSchema.methods.generateToken = function (): string {
 
         if (!process.env.TOKEN_SECRET || !process.env.TOKEN_EXPIRY) {
@@ -15,7 +17,6 @@ export const addTokenMethod = (adminSchema: Schema<Iadmin, Model<Iadmin>, IAdmin
 
         return jwt.sign(
             {
-                code: this.code,
                 fullName: this.fullName,
                 email: this.email
             },

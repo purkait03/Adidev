@@ -4,9 +4,11 @@ import jwt from "jsonwebtoken";
 import { Admin } from "../models/admin.model.js";
 import type { MyCustomPayload } from "../interfaces/jwtCustomPayload.interface.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
+import dotenv from 'dotenv'
 
+dotenv.config()
 
-const jwtSecret = process.env.TOKEN
+const jwtSecret = process.env.TOKEN_SECRET
 if(!jwtSecret){
     throw new ApiError(500, "TOKEN_SECRET is not defined")
 }
@@ -19,7 +21,7 @@ export const verifyJWT = asyncHandler( async (req: Request, _: Response, next: N
             throw new ApiError(401, "Unauthorized access")
         }
         const decodedToken = jwt.verify(token, jwtSecret) as MyCustomPayload
-        const admin = await Admin.findOne({code: decodedToken.code}).select("-otp")
+        const admin = await Admin.findOne({email: decodedToken.email});
 
         if(!admin){
             throw new ApiError(401, "invalid  Token")
@@ -27,7 +29,7 @@ export const verifyJWT = asyncHandler( async (req: Request, _: Response, next: N
 
         req.admin = admin
         next()
-
+        
     }catch (error){
         let err = error as Error
         throw new ApiError(401, err?.message || "Unauthorized access")

@@ -1,5 +1,7 @@
 import {v2 as cloudinary, type UploadApiResponse, type UploadApiErrorResponse} from "cloudinary"
+import dotenv from 'dotenv'
 
+dotenv.config()
 
 if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
   throw new Error("Cloudinary environment variables are missing");
