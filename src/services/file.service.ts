@@ -3,7 +3,7 @@ import type { ICreateFile } from "../interfaces/file.interface.js"
 import { generateCode } from "../utils/codeGeneration.js";
 import { File } from "../models/file.model.js";
 import { createFileRepo, deleteFileRepo, findAndUpdateFileRepo } from "../repositories/file.repository.js";
-import { createFileFolderRepo, getFilesOfAFolderRepo, deleteFileFolderRepo } from "../repositories/fileFolder.repository.js";
+import { createFileFolderRepo, getFilesOfAFolderRepo, deleteFileFolderRepo, updateFileFolderRepo } from "../repositories/fileFolder.repository.js";
 import { Folder } from "../models/folder.model.js";
 import type { Iadmin } from "../interfaces/admin.interface.js";
 import { allPagesRepo, deleteFilePagesRepo } from "../repositories/filePage.repository.js";
@@ -24,20 +24,35 @@ const createFileService = async (folderCode: string, { name, description }: ICre
         throw new ApiError(500, "Code not generated")
     }
 
-    const file = await createFileRepo({ code, name, description: description || '' })
+    const session = await mongoose.startSession()
 
-    if (!file) {
-        throw new ApiError(500, "Something went wrong while creating file")
+    try {
+        let file
+        let fileFolder
+        await session.withTransaction(async () => {
+            file = await createFileRepo({ code, name, description: description || '' }, session)
+
+            if (!file) {
+                throw new Error("Something went wrong while creating file")
+            }
+
+            fileFolder = await createFileFolderRepo(file.code, folderCode, session)
+            if (!fileFolder) {
+                throw new Error("Something went wrong while creating fileFolder")
+            }
+
+        })
+        return { file, fileFolder }
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new ApiError(400, `File creation aborted:    ${error.message}`)
+        }
+        throw error
+    } finally {
+        await session.endSession()
     }
 
-    const fileFolder = await createFileFolderRepo(file.code, folderCode)
-    if (!fileFolder) {
-        await deleteFileRepo(file.code)
 
-        throw new ApiError(500, "Something went wrong while creating fileFolder")
-    }
-
-    return { file, fileFolder }
 }
 
 const getFilesService = async (folderCode: string) => {
@@ -66,21 +81,42 @@ const updateFileService = async (fileCode: string, data: any) => {
 
 const moveFileService = async (fileCode: string, folderCode: string) => {
 
-    if (!fileCode && !folderCode) {
+    if (!fileCode || !folderCode) {
         throw new ApiError(400, "File code and Folder code is required as query")
     }
 
-    const newMovedFileFolder = await createFileFolderRepo(fileCode, folderCode)
+    const session = await mongoose.startSession()
+    try {
+        let newMovedFileFolder
+        await session.withTransaction(async () => {
+            // newMovedFileFolder = await createFileFolderRepo(fileCode, folderCode, session)
 
-    if (!newMovedFileFolder) {
-        throw new ApiError(404, "Something went wrong while moving file")
+            // if (!newMovedFileFolder) {
+            //     throw new Error("Something went wrong while moving file")
+            // }
+
+            // const deletedFileFolder = await deleteFileFolderRepo(fileCode, session)
+            // if (!deletedFileFolder) {
+            //     throw new Error("Something went wrong while moving file")
+            // }
+            newMovedFileFolder = await updateFileFolderRepo(fileCode, folderCode, session)
+
+            if (!newMovedFileFolder) {
+                throw new Error(
+                    "File or existing file-folder relationship not found"
+                );
+            }
+        })
+        return newMovedFileFolder
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new ApiError(400, `Moving file aborted:    ${error.message}`)
+        }
+        throw error
+    } finally {
+        await session.endSession()
     }
 
-    const deletedFileFolder = await deleteFileFolderRepo(fileCode)
-    if (!deletedFileFolder) {
-        throw new ApiError(404, "Something went wrong while moving file")
-    }
-    return newMovedFileFolder
 }
 
 const deleteFileService = async (fileCode: string) => {
@@ -89,7 +125,7 @@ const deleteFileService = async (fileCode: string) => {
     try {
         await session.withTransaction(async () => {
             const fileFolder = await deleteFileFolderRepo(fileCode, session)
-            
+
             const file = await deleteFileRepo(fileCode, session)
 
             // const [fileFolder, filepage, file] = await Promise.all([
@@ -98,35 +134,35 @@ const deleteFileService = async (fileCode: string) => {
             //     deleteFileRepo(fileCode)
             // ])
 
-            if(!fileFolder){
+            if (!fileFolder) {
                 throw new Error('FileFolder is not deleted')
             }
-            if(file.deletedCount === 0){
+            if (file.deletedCount === 0) {
                 throw new Error('File is not deleted')
             }
 
             const cursor = allPagesRepo(fileCode, session)
-            
+
             let batchIds = []
             const BATCH_SIZE = 100
 
-            for await (const doc of cursor){
+            for await (const doc of cursor) {
                 batchIds.push(doc.pageCode)
-                
-                if(batchIds.length === BATCH_SIZE){
+
+                if (batchIds.length === BATCH_SIZE) {
                     await bulkDeletePageRepo(batchIds, session)
                     batchIds = []
                 }
             }
 
-            if(batchIds.length > 0){
+            if (batchIds.length > 0) {
                 await bulkDeletePageRepo(batchIds, session)
             }
 
             await deleteFilePagesRepo(fileCode, session)
         })
 
-        
+
     } catch (error) {
         if (error instanceof Error) {
             throw new ApiError(400, `Delete aborted:    ${error.message}`)

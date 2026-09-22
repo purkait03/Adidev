@@ -3,8 +3,9 @@ import type { Ifile } from "../interfaces/file.interface.js";
 import type { ClientSession } from "mongoose";
 
 
-const createFileRepo = async (fileData: Ifile) => {
-    return await File.create(fileData)
+const createFileRepo = async (fileData: Ifile, session: ClientSession) => {
+    const [file] = await File.create([fileData], {session})
+    return file
 }
 
 const deleteFileRepo = async (fileCode: string, session?: ClientSession) => {

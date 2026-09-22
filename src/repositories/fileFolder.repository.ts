@@ -3,8 +3,9 @@ import { FileFolder } from "../models/fileFolder.model.js"
 
 
 
-const createFileFolderRepo = async (fileCode: string, folderCode: string) => {
-    return await FileFolder.create({fileCode, folderCode})
+const createFileFolderRepo = async (fileCode: string, folderCode: string, session: ClientSession) => {
+    const [fileFolder] = await FileFolder.create([{fileCode, folderCode}], {session})
+    return fileFolder
 }
 
 const getFileFolderRepo = async (folderCode: string) => {
@@ -58,11 +59,27 @@ const deleteFilesOfAFolderRepo = async (folderCode: string, session: ClientSessi
     return await FileFolder.deleteMany({folderCode}, {session})
 }
 
+const updateFileFolderRepo = async (fileCode: string, folderCode: string, session: ClientSession)=>{
+    return await FileFolder.findOneAndUpdate(
+        {fileCode}, 
+        {
+        $set: {
+            folderCode
+        }
+    }, 
+        {
+            new: true,
+            session
+        }
+    )
+}
+
 export {
     createFileFolderRepo,
     getFileFolderRepo,
     getFilesOfAFolderRepo,
     deleteFileFolderRepo,
     allFileCursorRepo,
-    deleteFilesOfAFolderRepo
+    deleteFilesOfAFolderRepo,
+    updateFileFolderRepo
 }
