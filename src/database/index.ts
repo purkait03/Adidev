@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '../../.env' });
+dotenv.config({ path: './.env' });
 
 const maxRetries: number = Number(process.env.MAX_RETRIES ?? '3');
 const BASE_DELAY: number = 1000;
